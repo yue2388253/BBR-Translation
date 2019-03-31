@@ -26,7 +26,8 @@ Bottleneck很重要！这是因为：
 
 ![1553957276266](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957276266.png)
 
-<center>图1 发送速率和RTT vs 在外数据<\center>
+<center>图1 发送速率和RTT vs 在外数据
+
 
 当没有足够的数据来填满管道时，RTprop决定了流的行为；当有足够的数据填满时，那就变成了BtlBw来决定。这两条约束交汇在点inflight=BtlBw*RTprop，也就是管道的BDP（带宽与时延的乘积）。当管道被填满时，那些超过的部分（inflight-BDP）就会在瓶颈链路中制造了一个队列，从而导致了RTT的增大，如图1所示。当数据继续增加直到填满了缓存时，多余的报文就会被丢弃了。拥塞就是发生在BDP点的右边，而拥塞控制算法就是来控制流的平均工作点离BDP点有多远。
 
@@ -130,7 +131,8 @@ BBR将它的大部分时间的在外发送数据都保持为一个BDP大小，�
 
 ![1553957318153](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957318153.png)
 
-<center>图2 RTT（蓝线），在外数据（绿线）和发送速率（红线）细节<\center>
+<center>图2 RTT（蓝线），在外数据（绿线）和发送速率（红线）细节
+
 
 > (BBR is a simple instance of a Max-plus control system, a new approach to control based on nonstandard algebra.12 This approach allows the adaptation rate [controlled by the max gain] to be independent of the queue growth [controlled by the average gain]. Applied to this problem, it results in a simple, implicit control loop where the adaptation to physical constraint changes is automatically handled by the filters representing those constraints. A conventional control system would require multiple loops connected by a complex state machine to accomplish the same result.)
 
@@ -140,7 +142,8 @@ BBR将它的大部分时间的在外发送数据都保持为一个BDP大小，�
 
 ![1553957339680](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957339680.png)
 
-<center>图3 带宽变化<\center>
+<center>图3 带宽变化
+
 
 图4展示了1个10Mbps，40ms的BBR流在一开始的1秒内，发送方（绿线）和接收方（蓝线）的过程。红线表示的是同样条件下的CUBIC发送。垂直的灰线表示了BBR状态的转换。下方图片展示了两种连接的RTT在这段时间的变化。注意，只有收到了ACK（蓝线）之后才能确定出RTT，所以在时间上有点偏移。图中标注了BBR何时学习到RTT和如何反应。
 
@@ -154,7 +157,8 @@ BBR将它的大部分时间的在外发送数据都保持为一个BDP大小，�
 
 ![1553957379335](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957379335.png)
 
-<center>图5 在10Mbps、40ms链路上的BBR流和CUBIC流的前8秒对比<\center>
+<center>图5 在10Mbps、40ms链路上的BBR流和CUBIC流的前8秒对比
+
 
 ### Multiple BBR flows sharing a bottleneck
 
@@ -166,7 +170,8 @@ ProbeBW机制（见图2）会使得大流会让渡带宽给小流，最终使得
 
 ![1553957399064](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957399064.png)
 
-<center>图6 共享同一个瓶颈链路的5个BBR流的吞吐量<\center>
+<center>图6 共享同一个瓶颈链路的5个BBR流的吞吐量
+
 
 BBR可以使得多个流共享一个链路而不会造成队列，而基于丢包的拥塞控制算法会造成队列周期性地增长然后再溢出，导致了高时延和丢包。
 
@@ -176,7 +181,8 @@ BBR可以使得多个流共享一个链路而不会造成队列，而基于丢�
 
 ![1553957424246](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957424246.png)
 
-<center>图7 BBR的吞吐量相对CUBIC的吞吐量提高比例<\center>
+<center>图7 BBR的吞吐量相对CUBIC的吞吐量提高比例
+
 
 图7展示了BBR相比CUBIC的吞吐量提升，子图显示的是吞吐量的CDF（累积分布函数）。图中的数据来源于一个探测服务，该探测服务每分钟都会打开一个BBR连接和一个CUBIC连接到远端数据中心，然后传输8MB数据。这些连接包括了B4的很多路径，如在北美、欧洲、亚洲之间或者在洲内传输路径等等。
 
@@ -190,19 +196,22 @@ BBR不再使用丢包作为拥塞信号是我们的一大贡献！为了达到�
 
 ![1553957438947](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957438947.png)
 
-<center>图8 BBC和CUBIC的吞吐量与丢包率的关系<\center>
+<center>图8 BBC和CUBIC的吞吐量与丢包率的关系
+
 
 在全球范围内的70亿互联网移动终端中，超过一半设备使用8至114kbps的2.G系统。因为基于丢包的拥塞控制算法填满buffer的特点，这些连接已经暴露了太多太多的问题。他们的bottleneck链路一般情况下都是无线终端与基站之间的链路。图10展示了使用BBR和使用CUBIC在基站与用户终端见的延迟的对比。其中的水平线标志了一个很严重的结果：TCP在连接建立阶段没有办法忍受太长的RTT时延，在该阶段，TCP等待SYN的时延是一个与操作系统相关的timeout。当移动设备在接收大量的数据而此时的基站缓存又足够大时，在基站的队列耗尽之前，移动终端将没有办法打开新的连接到互联网！（这是因为移动终端等到花儿都谢了都没有等到SYN ACK）
 
 ![1553957458705](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957458705.png)
 
-<center>图9 BBR的RTT中位数相比CUBIC的提高比例<\center>
+<center>图9 BBR的RTT中位数相比CUBIC的提高比例
+
 
 图10展示了在稳定状态下，在一个具有8个BBR（绿线）或CUBIC流（红线）的128Kbps，40ms的链路上，RTT中位数与链路缓存大小的关系。由图中可以看到，无论链路缓存如何变化，BBR都可以保持队列为空。而由于CUBIC总会把缓存填满，所以CUBIC的曲线随着缓存的增大而线性增长。
 
 ![1553957480081](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1553957480081.png)
 
-<center>图10 稳定状态下RTT中位数随着链路缓存大小的变化<\center>
+<center>图10 稳定状态下RTT中位数随着链路缓存大小的变化
+
 
 ### Mobile cellular adaptive bandwidth
 
